@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hybrid Dehazing System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+/* -------------------- Background Animation -------------------- */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(-45deg, #1e3c72, #2a5298, #0f2027, #203a43);
+    background-size: 400% 400%;
+    animation: gradientBG 12s ease infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;   /* FIXED (prevents content cut) */
+    padding: 20px;       /* ADDED (better spacing on small screens) */
+}
+
+@keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+/* -------------------- Glass Card -------------------- */
+.container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 950px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    text-align: center;
+    color: white;
+    animation: fadeIn 1.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(30px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+h2 {
+    font-size: 42px;
+    margin-bottom: 50px;
+    font-weight: 600;
+}
+
+/* Form layout */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 35px;
+}
+
+/* -------------------- Upload Box -------------------- */
+.upload-box {
+    width: 100%;
+    max-width: 500px;
+    padding: 45px;
+    border-radius: 20px;
+    border: 3px dashed rgba(255,255,255,0.6);
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.upload-box:hover {
+    background: rgba(255,255,255,0.08);
+    transform: scale(1.02);
+}
+
+input[type="file"] {
+    display: none;
+}
+
+/* -------------------- Button -------------------- */
+button {
+    width: 300px;
+    padding: 18px;
+    border-radius: 50px;
+    border: none;
+    font-size: 22px;
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    color: white;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 15px rgba(0,198,255,0.8);
+}
+
+/* -------------------- Images Section (FIXED ALIGNMENT) -------------------- */
+.images {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;   /* CENTERED */
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 60px;                 /* Better spacing */
+}
+
+.images div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;       /* CENTER EACH BLOCK */
+}
+
+.images h4 {
+    margin-bottom: 15px;
+}
+
+.images img {
+    width: 380px;
+    max-width: 100%;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    transition: 0.4s;
+}
+
+.images img:hover {
+    transform: scale(1.05);
+}
+
+/* -------------------- Prediction -------------------- */
+.prediction {
+    margin-top: 30px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #00ffcc;
+}
+
+/* -------------------- Upload Success -------------------- */
+.file-name {
+    display: block;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #00ffcc;
+    font-weight: 500;
+}
+
+.preview-img {
+    display: none;
+    margin-top: 15px;
+    width: 100px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.upload-success {
+    border: 3px solid #00ff88 !important;
+    background: rgba(0, 255, 136, 0.1);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+}
+
+/* -------------------- Loader -------------------- */
+.loader {
+    display: none;
+    margin-top: 40px;
+    text-align: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255,255,255,0.3);
+    border-top: 4px solid #00ffcc;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* -------------------- Responsive -------------------- */
+@media (max-width: 480px) {
+    h1 {
+        font-size: 22px;
+    }
+
+    p {
+        font-size: 14px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
+
+/* NAVBAR */
+.navbar {
+    width: 100%;
+    padding: 20px 40px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-weight: 600;
+}
+
+/* HERO */
+.hero {
+    margin-top: 80px;
+    text-align: center;
+    color: white;
+}
+
+.hero h1 {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    font-size: 18px;
+    opacity: 0.8;
+}
+
+/* Download Button */
+.download-btn {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 14px 30px;
+    border-radius: 40px;
+    background: linear-gradient(90deg, #00ffcc, #00c6ff);
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.download-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Clear Button */
+.clear-btn {
+    margin-top: 20px;
+    background: #ff4d4d;
+}
+
+/* Footer */
+footer {
+    margin-top: 60px;
+    text-align: center;
+    color: white;
+    opacity: 0.7;
+    font-size: 14px;
+}
+
+</style>
+</head>
+
+<body>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">Smart Image Dehazing</div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+    <h1>Hybrid Dehazing Engine</h1>
+    <p>Enhance Visibility. Improve Clarity.</p>
+    <p>Upload your image and see the difference.</p>
+</section>
+
+<!-- MAIN CARD -->
+<div class="container">
+
+    {% if not uploaded %}
+    <form method="POST" enctype="multipart/form-data" onsubmit="showLoader()">
+
+        <label for="file-upload" class="upload-box" id="uploadBox">
+            <span id="uploadText">Click to Upload Hazy Image</span>
+            <span id="fileName" class="file-name"></span>
+        </label>
+
+        <input id="file-upload" type="file" name="image" accept="image/*" required>
+
+        <button type="submit">Process Image</button>
+    </form>
+    {% endif %}
+
+    {% if uploaded %}
+        <div class="prediction">
+            Prediction: {{ prediction }} ({{ confidence }}%)
+        </div>
+
+        <div class="images">
+            <div>
+                <h4>Original</h4>
+                <img src="{{ uploaded }}">
+            </div>
+            <div>
+                <h4>Enhanced</h4>
+                <img src="{{ result }}">
+            </div>
+        </div>
+
+        <a href="{{ result }}" download class="download-btn">Download Result</a>
+
+        <form action="/clear" method="POST" >
+            <button class="clear-btn">Upload Another</button>
+        </form>
+    {% endif %}
+</div>
+
+
+
+</div>
+
+<script>
+function showLoader() {
+    document.getElementById("loader").style.display = "block";
+}
+window.onload = function() {
+    document.getElementById("loader").style.display = "none";
+};
+</script>
+
+<script>
+const fileInput = document.getElementById("file-upload");
+const uploadBox = document.getElementById("uploadBox");
+const fileName = document.getElementById("fileName");
+const uploadText = document.getElementById("uploadText");
+
+fileInput.addEventListener("change", function() {
+        fileName.textContent = "✅ " + this.files[0].name;
+        uploadText.textContent = "Image Selected";
+        uploadBox.classList.add("upload-success");
+    
+});
+</script>
+
+</body>
+</html>
